@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.Optional;
-
 @Controller
 @RequiredArgsConstructor
 public class TodoFormController {
@@ -43,11 +41,25 @@ public class TodoFormController {
     }
 
     @GetMapping("/edit/{id}")
-    public String showUpdateForm(@PathVariable("id") Long id,Model model) {
+    public String showUpdateForm(@PathVariable("id") Long id, Model model) {
         TodoItem todoItem = todoItemService
                 .getById(id)
                 .orElseThrow(() -> new IllegalArgumentException("TodoItem id: " + id + " not found"));
         model.addAttribute("todo", todoItem);
         return "edit-todo-item";
+    }
+
+    @PostMapping("/todo/{id}")
+    public String updateTodoItem(@PathVariable("id") Long id, @Valid TodoItem todoItem, BindingResult result, Model model) {
+        TodoItem item = todoItemService
+                .getById(id)
+                .orElseThrow(() -> new IllegalArgumentException("TodoItem id: " + id + " not found"));
+        item.setIsComplete(todoItem.getIsComplete());
+        item.setDescription(todoItem.getDescription());
+
+        todoItemService.save(item);
+
+        return "redirect:/";
+
     }
 }
